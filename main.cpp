@@ -4,7 +4,7 @@
 #include <windows.h>
 
 
-void c()
+void change_common_directory()
 {
     std::string path, new_path = "";
     TCHAR buffer[MAX_PATH];
@@ -14,11 +14,11 @@ void c()
     int k;
     if (path[path.size() - 1] == 'g')
     {
-        k = 20;
+        k = 19;
     }
     else
     {
-        k = 21;
+        k = 20;
     }
     for (int i = 0; i < path.size() - k; i++)
     {
@@ -32,7 +32,7 @@ void c()
 
 int main()
 {
-    c();
+    change_common_directory();
     sf::RenderWindow window = sf::RenderWindow(sf::VideoMode(1200, 667), "game");
 
     sf::Texture menuTexture1, menuTexture2, menuTexture3, aboutTexture, menuBackground;
@@ -68,7 +68,7 @@ int main()
         if (sf::IntRect(560, 236, 55, 20).contains(sf::Mouse::getPosition(window))) { menu1.setColor(sf::Color::Blue); menuNum = 1; }
         if (sf::IntRect(560, 295, 55, 20).contains(sf::Mouse::getPosition(window))) { menu2.setColor(sf::Color::Blue); menuNum = 2; }
         if (sf::IntRect(560, 358, 35, 20).contains(sf::Mouse::getPosition(window))) { menu3.setColor(sf::Color::Blue); menuNum = 3; }
-        
+        if (sf::IntRect(560, 520, 10, 20).contains(sf::Mouse::getPosition(window))) { menuNum = 4; }
 
         if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
@@ -76,6 +76,7 @@ int main()
             if (menuNum == 1) { game(); } //если нажали первую кнопку, то выходим из меню
             if (menuNum == 2) { window.draw(about); window.display(); while (!sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)); }
             if (menuNum == 3) { window.close(); return 0;}
+            if (menuNum == 4) { game(1); }
 
         }
 

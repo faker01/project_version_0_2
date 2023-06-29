@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <windows.h>
+#include <fstream>
 
 
 // создаются инициализационные переменные
@@ -10,32 +11,9 @@ sf::RenderWindow* window;
 sf::Texture* background_texture;
 sf::Text Score;
 int score;
-
-
-void change_common_directory()
-{
-    std::string path, new_path = "";
-    TCHAR buffer[MAX_PATH];
-    GetCurrentDirectory(sizeof(buffer), buffer);
-    CharToOemA(buffer, buffer);
-    path = buffer;
-    int k;
-    if (path[path.size() - 1] == 'g')
-    {
-        k = 20;
-    }
-    else
-    {
-        k = 21;
-    }
-    for (int i = 0; i < path.size() - k; i++)
-    {
-        new_path = new_path + path[i];
-    }
-    char new_path_char[256];
-    strcpy(new_path_char, new_path.c_str());
-    SetCurrentDirectory(new_path_char);
-}
+sf::Text BestScore;
+int bestScore;
+sf::Font font;
 
 
 // объект птица
@@ -47,10 +25,18 @@ private:
 
 public:
     // инициализация птицы
-    Bird()
+    Bird(int t1)
     {
         texture = new sf::Texture();
-        texture->loadFromFile("textures/bird.png");
+        if (t1 == 1)
+        {
+            texture->loadFromFile("textures/Best.png");
+        }
+        else
+        {
+            texture->loadFromFile("textures/bird.png");
+        }
+        
         y = 400;
         vel = 0;
     }
@@ -194,12 +180,22 @@ Pipe_low* pipe_lower;
 
 
 // инициализация графики
-void setup()
+void setup(int t1)
 {
+    score = 0;
+    font.loadFromFile("textures/arial.ttf");
+    Score.setFont(font);
+    Score.setCharacterSize(24);
+    Score.setPosition(10, 10);
+    Score.setString("Score: 0");
+    BestScore.setFont(font);
+    BestScore.setCharacterSize(24);
+    BestScore.setPosition(10, 40);
+    BestScore.setString("Best Score:" + std::to_string(bestScore));
     // создаётся окно
     window = new sf::RenderWindow(sf::VideoMode(400, 700), "game");
     // создаётся птица
-    bird = new Bird();
+    bird = new Bird(t1);
     // создаётся верхняя и нижняя труба 
     pipe_lower = new Pipe_low();
     pipe_upper = new Pipe_up();
@@ -243,9 +239,16 @@ void handle_event(sf::Event& event)
 // обновление положения всех объектов
 void update()
 {
+
     bird->update();
     pipe_lower->update();
     pipe_upper->update();
+    Score.setString("Score: " + std::to_string(score));
+    if (score > bestScore)
+    {
+        bestScore = score;
+        BestScore.setString("Best Score: " + std::to_string(bestScore));
+    }
 }
 
 
@@ -260,6 +263,8 @@ void draw()
     pipe_lower->draw();
     
     bird->draw();
+    window->draw(Score);
+    window->draw(BestScore);
 }
 
 
@@ -287,10 +292,16 @@ bool check_loose()
 
 
 // основная функция
-void game()
-{    
+void game(int t = 0)
+{
+    std::ifstream File("textures/best_score.txt");
+    if (File.is_open())
+    {
+        File >> bestScore;
+        File.close();
+    }
     // вызов функции инициализации графики
-    setup();
+    setup(t);
     // создание переменной дельты часов
     sf::Clock delta_clock;
     // старт игры
@@ -313,11 +324,19 @@ void game()
         // вызов функции проверки на проигрыш
         if (check_loose())
         {
-            std::cout << "U loose(";
+            std::ofstream File("textures/best_score.txt");
+            if (File.is_open())
+            {
+                std::cout << "'hahaha'" << std::endl;
+                File << bestScore;
+                File.close();
+            }
+            std::cout << "U loose(" << std::endl;
             break;
         }
 
     }
     // вызов функции удаления графики
     destroy();
+    
 }
