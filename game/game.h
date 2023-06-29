@@ -8,10 +8,38 @@
 float delta;
 sf::RenderWindow* window;
 sf::Texture* background_texture;
+sf::Text Score;
+int score;
+
+
+void change_common_directory()
+{
+    std::string path, new_path = "";
+    TCHAR buffer[MAX_PATH];
+    GetCurrentDirectory(sizeof(buffer), buffer);
+    CharToOemA(buffer, buffer);
+    path = buffer;
+    int k;
+    if (path[path.size() - 1] == 'g')
+    {
+        k = 20;
+    }
+    else
+    {
+        k = 21;
+    }
+    for (int i = 0; i < path.size() - k; i++)
+    {
+        new_path = new_path + path[i];
+    }
+    char new_path_char[256];
+    strcpy(new_path_char, new_path.c_str());
+    SetCurrentDirectory(new_path_char);
+}
 
 
 // объект птица
-class Bird 
+class Bird
 {
 private:
     sf::Texture* texture;
@@ -86,7 +114,7 @@ public:
         pipe_up->loadFromFile("textures/pipe_up.png");
         x = window->getSize().x + pipe_up->getSize().x;
         y = 100 * delta;
-    } 
+    }
     // прорисовка верхней трубы
     void draw()
     {
@@ -97,10 +125,11 @@ public:
     // обновление позиции верхней трубы
     void update()
     {
-        
+
         x -= 100 * delta;
         if (x < 0)
         {
+            score ++;
             x = window->getSize().x + pipe_up->getSize().x;
         }
     }
@@ -206,7 +235,7 @@ void handle_event(sf::Event& event)
             // вызов функции прыжка
             bird->flap();
         }
-        
+
     }
 }
 
@@ -229,7 +258,7 @@ void draw()
 
     pipe_upper->draw();
     pipe_lower->draw();
-
+    
     bird->draw();
 }
 
@@ -237,7 +266,7 @@ void draw()
 // проверка на проигрыш
 bool check_loose()
 {
-    
+
     int x_pu = pipe_upper->get_coordinate_x();
     int x_pl = pipe_lower->get_coordinate_x();
     int y_b = bird->get_coordinate_y();
@@ -259,29 +288,7 @@ bool check_loose()
 
 // основная функция
 void game()
-{   
-    // ЧТОБЫ РАБОТАЛИ ТЕКСТУРЫ
-    std::string path, new_path = "";
-    TCHAR buffer[MAX_PATH];
-    GetCurrentDirectory(sizeof(buffer), buffer);
-    CharToOemA(buffer, buffer);
-    path = buffer;
-    int k;
-    if (path[path.size()-1] == 'g')
-    {
-        k = 20;
-    }
-    else
-    {
-        k = 21;
-    }
-    for (int i = 0; i < path.size() - k; i++)
-    {
-        new_path = new_path + path[i];
-    }
-    char new_path_char[256];
-    strcpy(new_path_char, new_path.c_str());
-    SetCurrentDirectory(new_path_char);
+{    
     // вызов функции инициализации графики
     setup();
     // создание переменной дельты часов
@@ -290,7 +297,7 @@ void game()
     while (window->isOpen())
     {
         sf::Event event{};
-        
+
         while (window->pollEvent(event))
         {
             handle_event(event);
@@ -313,6 +320,4 @@ void game()
     }
     // вызов функции удаления графики
     destroy();
-    
-    return 0;
 }
