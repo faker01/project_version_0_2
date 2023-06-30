@@ -46,7 +46,7 @@ namespace gm
             }
             if (!JumpButton.loadFromFile("Audio/JumpSound.wav"))
             {
-                std::cout << "ERROR";
+                throw std::runtime_error("Failed to load sound: Audio/JumpSound.wav");
             }
             JumpSound.setBuffer(JumpButton);
             JumpSound.setVolume(100);
@@ -297,6 +297,10 @@ namespace gm
         {
             File >> bestScore;
             File.close();
+        }
+        else
+        {
+            throw std::runtime_error("Failed to open file: textures/best_score.txt");
         }
         // вызов функции инициализации графики
         setup(t);
