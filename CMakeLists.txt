@@ -32,3 +32,4 @@ target_link_libraries("${PROJECT_NAME}" sfml-graphics-s-d
         ogg)
 file(COPY "textures" DESTINATION "/")
 file(COPY "Audio" DESTINATION "/")
+file(COPY "openal32.dll" DESTINATION "/")
