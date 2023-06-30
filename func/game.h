@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <random>
+#include <SFML/Audio.hpp>
 
 namespace gm
 {
@@ -25,6 +26,8 @@ namespace gm
     class Bird
     {
     private:
+        sf::SoundBuffer JumpButton;
+        sf::Sound JumpSound;
         sf::Texture* texture;
         float y, vel;
 
@@ -41,7 +44,12 @@ namespace gm
             {
                 texture->loadFromFile("textures/bird.png");
             }
-
+            if (!JumpButton.loadFromFile("Audio/JumpSound.wav"))
+            {
+                std::cout << "ERROR";
+            }
+            JumpSound.setBuffer(JumpButton);
+            JumpSound.setVolume(100);
             y = 400;
             vel = 0;
         }
@@ -79,7 +87,7 @@ namespace gm
         void flap()
         {
             vel = -200;
-
+            JumpSound.play();
         }
         // получение координаты y птицы
         int get_coordinate_y()

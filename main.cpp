@@ -6,9 +6,6 @@
 #include <windows.h>
 
 
-
-
-
 int main()
 {
     
@@ -40,7 +37,7 @@ int main()
         }
         sf::Sprite menu1(menuTexture1), menu2(menuTexture2), menu3(menuTexture3), about(aboutTexture), menuBg(menuBackground);
 
-        sf::SoundBuffer buffer1, buffer2;
+        sf::SoundBuffer buffer1, buffer2, buffer3;
         if (!buffer1.loadFromFile("Audio/ExitButton.wav"))
         {
             std::cout << "ERROR";
@@ -49,12 +46,17 @@ int main()
         {
             std::cout << "ERROR";
         }
-        sf::Sound ExitSound, StartSound;
+        if (!buffer3.loadFromFile("Audio/Audio.wav"))
+        {
+            std::cout << "ERROR";
+        }
+        sf::Sound ExitSound, StartSound, Audio_ERROR;
         StartSound.setBuffer(buffer2);
         ExitSound.setBuffer(buffer1);
+        Audio_ERROR.setBuffer(buffer3);
         ExitSound.setVolume(100);
         StartSound.setVolume(100);
-        
+        Audio_ERROR.setVolume(100);
 
        
 
@@ -81,13 +83,13 @@ int main()
             if (sf::IntRect(560, 236, 55, 20).contains(sf::Mouse::getPosition(window))) { menu1.setColor(sf::Color::Blue); StartSound.play(); menuNum = 1; }
             if (sf::IntRect(560, 295, 55, 20).contains(sf::Mouse::getPosition(window))) { menu2.setColor(sf::Color::Blue); menuNum = 2; }
             if (sf::IntRect(560, 358, 35, 20).contains(sf::Mouse::getPosition(window))) { menu3.setColor(sf::Color::Blue); ExitSound.play(); menuNum = 3; }
-            if (sf::IntRect(560, 520, 10, 20).contains(sf::Mouse::getPosition(window))) { menuNum = 4; }
+            if (sf::IntRect(560, 660, 5, 5).contains(sf::Mouse::getPosition(window))) { Audio_ERROR.play(); menuNum = 4; }
 
             if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
             {
                 if (menuNum == 1) { gm::game(); } //если нажали первую кнопку, то выходим из меню
                 if (menuNum == 2) { window.draw(about); window.display(); while (!sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)); }
-                if (menuNum == 3) { window.close(); std::cout << "Thanks for trying our game" << std::endl; return 0; }
+                if (menuNum == 3) { window.close(); std::cout << "Thanks for trying our game" << std::endl; }
                 if (menuNum == 4) { gm::game(1); }
             }
 
