@@ -1,41 +1,20 @@
 #include <iostream>
-#include "game/game.h"
+#include "func/game.h"
+#include "func/change_directory.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <windows.h>
 
 
-void change_common_directory()
-{
-    std::string path, new_path = "";
-    TCHAR buffer[MAX_PATH];
-    GetCurrentDirectory(sizeof(buffer), buffer);
-    CharToOemA(buffer, buffer);
-    path = buffer;
-    int k;
-    if (path[path.size() - 1] == 'g')
-    {
-        k = 19;
-    }
-    else
-    {
-        k = 20;
-    }
-    for (int i = 0; i < static_cast<int>(path.size()) - k; i++)
-    {
-        new_path = new_path + path[i];
-    }
-    char new_path_char[256];
-    strcpy_s(new_path_char, sizeof(new_path_char), new_path.c_str());
-    SetCurrentDirectory(new_path_char);
-}
+
+
 
 int main()
 {
     
     try
     {
-        change_common_directory();
+        cd::change_common_directory();
         sf::RenderWindow window(sf::VideoMode(1200, 667), "game");
 
         sf::Texture menuTexture1, menuTexture2, menuTexture3, aboutTexture, menuBackground;
@@ -106,10 +85,10 @@ int main()
 
             if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
             {
-                if (menuNum == 1) { game(); } //если нажали первую кнопку, то выходим из меню
+                if (menuNum == 1) { gm::game(); } //если нажали первую кнопку, то выходим из меню
                 if (menuNum == 2) { window.draw(about); window.display(); while (!sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)); }
                 if (menuNum == 3) { window.close(); std::cout << "Thanks for trying our game" << std::endl; return 0; }
-                if (menuNum == 4) { game(1); }
+                if (menuNum == 4) { gm::game(1); }
             }
 
             window.draw(menuBg);
