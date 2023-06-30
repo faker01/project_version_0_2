@@ -3,6 +3,8 @@
 #include <iostream>
 #include <windows.h>
 #include <fstream>
+#include <string>
+#include <random>
 
 
 // создаются инициализационные переменные
@@ -14,6 +16,8 @@ int score;
 sf::Text BestScore;
 int bestScore;
 sf::Font font;
+std::string pipes[2] = { "up", "down"};
+int positions[3] = { 0, 1, 2 };
 
 
 // объект птица
@@ -85,44 +89,72 @@ Bird* bird;
 
 
 // объект верхняя труба
-class Pipe_up
+class Pipe
 {
 private:
-    sf::Texture* pipe_up;
+    sf::Texture* pipe;
     float x;
     float y;
+    bool type;
 
 public:
     // инициализация верхней трубы
-    Pipe_up()
+    Pipe(bool t)
     {
-        pipe_up = new sf::Texture();
-        pipe_up->loadFromFile("textures/pipe_up.png");
-        x = window->getSize().x + pipe_up->getSize().x;
-        y = 100 * delta;
+        type = t;
+        pipe = new sf::Texture();
+        pipe->loadFromFile("textures/pipe_" + pipes[type] + ".png");
+        x = window->getSize().x + pipe->getSize().x;
+        if (type == 0)
+        {
+            y = 100 * delta - 70;
+        }
+        else
+        {
+            y = window->getSize().y - pipe->getSize().y + 70;
+        }
+        
     }
     // прорисовка верхней трубы
     void draw()
     {
-        sf::Sprite up_sprite(*pipe_up);
-        up_sprite.setPosition(x, y);
-        window->draw(up_sprite);
+        sf::Sprite pipe_sprite(*pipe);
+        pipe_sprite.setPosition(x, y);
+        window->draw(pipe_sprite);
     }
     // обновление позиции верхней трубы
     void update()
     {
-
         x -= 100 * delta;
         if (x < 0)
         {
-            score ++;
-            x = window->getSize().x + pipe_up->getSize().x;
+            x = window->getSize().x + pipe->getSize().x;
+            int pos_y = std::rand() % 3;
+            int p_y = positions[pos_y];
+            if (type == 0)
+            {
+                y = 100 * delta - 50 - 35 * p_y;
+                std::cout << "pipe_up:" << y << "  " << p_y << std::endl;
+                score++;
+            }
+            else
+            {
+                y = window->getSize().y - pipe->getSize().y + 50 - 100 * delta - 35 * p_y;
+                std::cout << "pipe_down:" << y << "  " << p_y << std::endl;
+            }
         }
     }
     // получение координаты y верхней трубы
     int get_coordinate_y()
     {
-        return y + pipe_up->getSize().y;
+        if (type == 0)
+        {
+            return y + pipe->getSize().y;
+        }
+        else
+        {
+            return y;
+        }
     }
     // получение координаты x верхней трубы
     int get_coordinate_x()
@@ -130,53 +162,8 @@ public:
         return x;
     }
 };
-Pipe_up* pipe_upper;
-
-
-// объект нижняя труба
-class Pipe_low
-{
-private:
-    float x;
-    float y;
-    sf::Texture* pipe_low;
-public:
-    // инициализация нижней трубы
-    Pipe_low()
-    {
-        pipe_low = new sf::Texture();
-        pipe_low->loadFromFile("textures/pipe_down.png");
-        x = window->getSize().x + pipe_low->getSize().x;
-        y = window->getSize().y - pipe_low->getSize().y - 100 * delta;
-    }
-    // прорисовка нижней трубы
-    void draw()
-    {
-        sf::Sprite up_sprite(*pipe_low);
-        up_sprite.setPosition(x, y);
-        window->draw(up_sprite);
-    }
-    // обновление позиции нижней трубы
-    void update()
-    {
-        x -= 100 * delta;
-        if (x < 0)
-        {
-            x = window->getSize().x + pipe_low->getSize().x;
-        }
-    }
-    // получение координаты y нижней трубы
-    int get_coordinate_y()
-    {
-        return y;
-    }
-    // получение координаты x нижней трубы
-    int get_coordinate_x()
-    {
-        return x;
-    }
-};
-Pipe_low* pipe_lower;
+Pipe* pipe_upper;
+Pipe* pipe_lower;
 
 
 // инициализация графики
@@ -197,8 +184,8 @@ void setup(int t1)
     // создаётся птица
     bird = new Bird(t1);
     // создаётся верхняя и нижняя труба 
-    pipe_lower = new Pipe_low();
-    pipe_upper = new Pipe_up();
+    pipe_lower = new Pipe(1);
+    pipe_upper = new Pipe(0);
     // создаётся фон
     background_texture = new sf::Texture();
     background_texture->loadFromFile("textures/background.jpg");
@@ -294,6 +281,7 @@ bool check_loose()
 // основная функция
 void game(int t = 0)
 {
+    std::srand(std::time(nullptr));
     std::ifstream File("textures/best_score.txt");
     if (File.is_open())
     {
@@ -327,7 +315,6 @@ void game(int t = 0)
             std::ofstream File("textures/best_score.txt");
             if (File.is_open())
             {
-                std::cout << "'hahaha'" << std::endl;
                 File << bestScore;
                 File.close();
             }
