@@ -6,6 +6,7 @@
 #include <string>
 #include <random>
 #include <SFML/Audio.hpp>
+#include "func/logger.h"
 
 namespace gm
 {
@@ -144,14 +145,13 @@ namespace gm
                 if (type == 0)
                 {
                     y = 100 * delta - 50 - 35 * p_y;
-                    std::cout << "pipe_up:" << y << "  " << p_y << std::endl;
                     score++;
                 }
                 else
                 {
                     y = window->getSize().y - pipe->getSize().y + 50 - 100 * delta - 35 * p_y;
-                    std::cout << "pipe_down:" << y << "  " << p_y << std::endl;
                 }
+
             }
         }
         // получение координаты y верхней трубы
@@ -180,25 +180,61 @@ namespace gm
     void setup(int t1)
     {
         score = 0;
-        font.loadFromFile("textures/arial.ttf");
-        Score.setFont(font);
-        Score.setCharacterSize(24);
-        Score.setPosition(10, 10);
-        Score.setString("Score: 0");
-        BestScore.setFont(font);
-        BestScore.setCharacterSize(24);
-        BestScore.setPosition(10, 40);
-        BestScore.setString("Best Score:" + std::to_string(bestScore));
+        try
+        {
+            font.loadFromFile("textures/arial.ttf");
+            Score.setFont(font);
+            Score.setCharacterSize(24);
+            Score.setPosition(10, 10);
+            Score.setString("Score: 0");
+            BestScore.setFont(font);
+            BestScore.setCharacterSize(24);
+            BestScore.setPosition(10, 40);
+            BestScore.setString("Best Score:" + std::to_string(bestScore));
+        }
+        catch (const std::exception& e)
+        {
+            throw std::runtime_error("Failed to load font: Arial.ttf");
+        }
         // создаётся окно
-        window = new sf::RenderWindow(sf::VideoMode(400, 700), "game");
+        try
+        {
+            window = new sf::RenderWindow(sf::VideoMode(400, 700), "game");
+        }
+        catch (const std::exception& e)
+        {
+            throw std::runtime_error("Failed to create window");
+        }
         // создаётся птица
-        bird = new Bird(t1);
+        try
+        {
+            bird = new Bird(t1);
+        }
+        catch (const std::exception& e)
+        {
+            throw std::runtime_error("Failed to create bird");
+        }
         // создаётся верхняя и нижняя труба 
-        pipe_lower = new Pipe(1);
-        pipe_upper = new Pipe(0);
+        try
+        {
+            pipe_lower = new Pipe(1);
+            pipe_upper = new Pipe(0);
+        }
+        catch (const std::exception& e)
+        {
+            throw std::runtime_error("Failed to create pipes");
+        }
         // создаётся фон
-        background_texture = new sf::Texture();
-        background_texture->loadFromFile("textures/background.jpg");
+        try
+        {
+            background_texture = new sf::Texture();
+            background_texture->loadFromFile("textures/background.jpg");
+        }
+        catch (const std::exception& e)
+        {
+            throw std::runtime_error("Failed to create background");
+        }
+
 
     }
 
@@ -236,32 +272,46 @@ namespace gm
     // обновление положения всех объектов
     void update()
     {
-
-        bird->update();
-        pipe_lower->update();
-        pipe_upper->update();
-        Score.setString("Score: " + std::to_string(score));
-        if (score > bestScore)
+        try
         {
-            bestScore = score;
-            BestScore.setString("Best Score: " + std::to_string(bestScore));
+            bird->update();
+            pipe_lower->update();
+            pipe_upper->update();
+            Score.setString("Score: " + std::to_string(score));
+            if (score > bestScore)
+            {
+                bestScore = score;
+                BestScore.setString("Best Score: " + std::to_string(bestScore));
+            }
         }
+        catch (const std::exception& e)
+        {
+            throw std::runtime_error("Failed to update frame");
+        }
+        
     }
 
 
     // прорисовка кадра
     void draw()
     {
-        window->clear();
+        try
+        {
+            window->clear();
 
-        window->draw(sf::Sprite(*background_texture));
+            window->draw(sf::Sprite(*background_texture));
 
-        pipe_upper->draw();
-        pipe_lower->draw();
+            pipe_upper->draw();
+            pipe_lower->draw();
 
-        bird->draw();
-        window->draw(Score);
-        window->draw(BestScore);
+            bird->draw();
+            window->draw(Score);
+            window->draw(BestScore);
+        }
+        catch (const std::exception& e)
+        {
+            throw std::runtime_error("Failed to create a frame");
+        }
     }
 
 
@@ -289,26 +339,45 @@ namespace gm
 
 
     // основная функция
-    void game(int t = 0)
+    void game(int t)
     {
+        ns_log::Logger log("game_log");
         std::srand(std::time(nullptr));
-        std::ifstream File("textures/best_score.txt");
-        if (File.is_open())
-        {
-            File >> bestScore;
-            File.close();
+        try
+        { 
+            std::ifstream File("textures/best_score.txt");
+            if (File.is_open())
+            {
+                File >> bestScore;
+                File.close();
+            }
+            else
+            {
+                throw std::runtime_error("Failed to open file: textures/best_score.txt");
+            }
         }
-        else
+        catch(const std::exception& e)
         {
-            throw std::runtime_error("Failed to open file: textures/best_score.txt");
+            log.send_message(e.what());
+            std::cerr << e.what() << std::endl;
         }
         // вызов функции инициализации графики
-        setup(t);
+        try
+        {
+            setup(t);
+        }
+        catch (const std::exception& e)
+        {
+            log.send_message(e.what());
+            std::cerr << e.what() << std::endl;
+        }
         // создание переменной дельты часов
         sf::Clock delta_clock;
         // старт игры
+        log.send_message("start game");
         while (window->isOpen())
         {
+            
             sf::Event event{};
 
             while (window->pollEvent(event))
@@ -319,20 +388,46 @@ namespace gm
             delta = delta_clock.getElapsedTime().asMicroseconds() / 1000.0f / 1000.0f;
             delta_clock.restart();
             // вызов функции обновления и прорисовки кадра
-            update();
-            draw();
+            try
+            {
+                update();
+            }
+            catch (const std::exception& e)
+            {
+                log.send_message(e.what());
+                std::cerr << e.what() << std::endl;
+            }
+            
+            try
+            {
+                draw();
+            }
+            catch (const std::exception& e)
+            {
+                log.send_message(e.what());
+                std::cerr << e.what() << std::endl;
+            }
             // вызов функции вывода кадра на экран
             window->display();
             // вызов функции проверки на проигрыш
             if (check_loose())
             {
-                std::ofstream File("textures/best_score.txt");
-                if (File.is_open())
+                try
                 {
-                    File << bestScore;
-                    File.close();
+                    std::ofstream File("textures/best_score.txt");
+                    if (File.is_open())
+                    {
+                        File << bestScore;
+                        File.close();
+                    }
+                }
+                catch (const std::exception& e)
+                {
+                    log.send_message("can't save results");
+                    std::cout << e.what() << std::endl;
                 }
                 std::cout << "U loose(" << std::endl;
+                log.send_message("end game");
                 break;
             }
 

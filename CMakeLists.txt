@@ -16,7 +16,8 @@ include_directories("inc/")
 link_directories("ext/SFML/lib/")
 add_executable("${PROJECT_NAME}" main.cpp
 				func/game.h
-                func/change_directory.h)
+                func/change_directory.h 
+                func/logger.h)
 target_link_libraries("${PROJECT_NAME}" sfml-graphics-s-d
         sfml-window-s-d
         sfml-system-s-d
@@ -34,3 +35,4 @@ target_link_libraries("${PROJECT_NAME}" sfml-graphics-s-d
 file(COPY "textures" DESTINATION "/")
 file(COPY "Audio" DESTINATION "/")
 file(COPY "openal32.dll" DESTINATION "/")
+file(COPY "logs" DESTINATION "/")
