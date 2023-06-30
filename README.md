@@ -2,7 +2,7 @@
 System requirements:
 - OC: Windows
 # Launch preparation:
-- download folder game
+- download folder Builded_game
 - Open
 - Play
 # For editors:
